@@ -175,11 +175,12 @@ class Normalizer {
 		$count = 1;
 		$normalized = [];
 		foreach ($data as $key => $value) {
-			if ($count++ >= $maxArrayItems) {
+			if ($count >= $maxArrayItems) {
 				$normalized['...'] =
 					'Over ' . $maxArrayItems . ' items, aborting normalization';
 				break;
 			}
+			$count++;
 			$normalized[$key] = $this->normalize($value, $depth);
 		}
 
