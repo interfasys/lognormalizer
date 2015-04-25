@@ -42,9 +42,9 @@ class Normalizer {
 	private $dateFormat;
 
 	/**
-	 * @param int $maxObjectDepth
-	 * @param int $maxArrayItems
-	 * @param null|string $dateFormat
+	 * @param int $maxObjectDepth The maximum depth at which to go when inspecting objects
+	 * @param int $maxArrayItems The maximum number of Array elements you want to show, when parsing an array
+	 * @param null|string $dateFormat The format to apply to dates
 	 */
 	public function __construct($maxObjectDepth = 2, $maxArrayItems = 20, $dateFormat = null) {
 		$this->maxObjectDepth = $maxObjectDepth;
