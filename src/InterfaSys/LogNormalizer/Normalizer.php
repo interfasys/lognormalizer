@@ -121,10 +121,28 @@ class Normalizer {
 				$data = mb_convert_encoding($data, "UTF-8");
 			}*/
 
+			if (is_float($data)) {
+				$data = $this->normalizeFloat($data);
+			}
+
 			return $data;
 		}
 
 		return [];
+	}
+
+	private function normalizeFloat($data) {
+		if (is_infinite($data)) {
+			$data = 'INF';
+			if ($data < 0){
+				$data = '-' . $data;
+			}
+		}
+		if (is_nan($data)) {
+			$data = 'NaN';
+		}
+
+		return $data;
 	}
 
 	/**
