@@ -49,7 +49,7 @@ class Normalizer {
 	public function __construct($maxObjectDepth = 2, $maxArrayItems = 20, $dateFormat = null) {
 		$this->maxObjectDepth = $maxObjectDepth;
 		$this->maxArrayItems = $maxArrayItems;
-		if ($dateFormat) {
+		if ($dateFormat !== null) {
 			$this->dateFormat = $dateFormat;
 		} else {
 			$this->dateFormat = static::SIMPLE_DATE;
