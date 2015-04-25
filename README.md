@@ -44,7 +44,7 @@ public function log($level, $message, array $variables= []) {
 
 And you would call it like this from another class
 
-$myLogger->log('debug', 'Logger test {var1}, {var2}', ['var1' => $var1, 'var2' => $var2])
+`$myLogger->log('debug', 'Logger test {var1}, {var2}', ['var1' => $var1, 'var2' => $var2]);`
 
 ### Normalize a single variable
 
