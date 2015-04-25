@@ -37,7 +37,7 @@ class Normalizer {
 	private $maxArrayItems;
 
 	/**
-	 * @type \DateTime
+	 * @type string
 	 */
 	private $dateFormat;
 
@@ -90,13 +90,14 @@ class Normalizer {
 			return $scalar;
 		}
 		$decisionArray = [
-			$this->normalizeTraversable($data, $depth),
-			$this->normalizeDate($data),
-			$this->normalizeObject($data, $depth),
-			$this->normalizeResource($data),
+			'normalizeTraversable' => [$data, $depth],
+			'normalizeDate'        => [$data],
+			'normalizeObject'      => [$data, $depth],
+			'normalizeResource'    => [$data],
 		];
 
-		foreach ($decisionArray as $dataType) {
+		foreach ($decisionArray as $functionName => $arguments) {
+			$dataType = call_user_func_array([$this, $functionName], $arguments);
 			if ($dataType !== null) {
 				return $dataType;
 			}
@@ -134,7 +135,7 @@ class Normalizer {
 	private function normalizeFloat($data) {
 		if (is_infinite($data)) {
 			$data = 'INF';
-			if ($data < 0){
+			if ($data < 0) {
 				$data = '-' . $data;
 			}
 		}
