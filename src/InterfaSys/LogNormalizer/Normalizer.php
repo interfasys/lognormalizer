@@ -22,6 +22,11 @@ namespace InterfaSys\LogNormalizer;
 class Normalizer {
 
 	/**
+	 * @type string
+	 */
+	const SIMPLE_DATE = "Y-m-d H:i:s";
+
+	/**
 	 * @type int
 	 */
 	private $maxObjectDepth;
@@ -32,12 +37,23 @@ class Normalizer {
 	private $maxArrayItems;
 
 	/**
+	 * @type \DateTime
+	 */
+	private $dateFormat;
+
+	/**
 	 * @param int $maxObjectDepth
 	 * @param int $maxArrayItems
+	 * @param null|\DateTime $dateFormat
 	 */
-	public function __construct($maxObjectDepth = 2, $maxArrayItems = 20) {
+	public function __construct($maxObjectDepth = 2, $maxArrayItems = 20, $dateFormat = null) {
 		$this->maxObjectDepth = $maxObjectDepth;
 		$this->maxArrayItems = $maxArrayItems;
+		if ($dateFormat) {
+			$this->dateFormat = $dateFormat;
+		} else {
+			$this->dateFormat = static::SIMPLE_DATE;
+		}
 	}
 
 	/**
@@ -61,7 +77,7 @@ class Normalizer {
 	}
 
 	/**
-	 * Converts Objects, Arrays and Exceptions to a String or a single Array
+	 * Converts Objects, Arrays, Dates and Exceptions to a String or a single Array
 	 *
 	 * @param $data
 	 * @param int $depth
@@ -75,6 +91,7 @@ class Normalizer {
 		}
 		$decisionArray = [
 			$this->normalizeTraversable($data, $depth),
+			$this->normalizeDate($data),
 			$this->normalizeObject($data, $depth),
 			$this->normalizeResource($data),
 		];
@@ -135,19 +152,34 @@ class Normalizer {
 	 * @return array
 	 */
 	private function normalizeTraversableElement($data, $depth) {
-		$maxArrayRecursion = $this->maxArrayItems;
+		$maxArrayItems = $this->maxArrayItems;
 		$count = 1;
 		$normalized = [];
 		foreach ($data as $key => $value) {
-			if ($count++ >= $maxArrayRecursion) {
+			if ($count++ >= $maxArrayItems) {
 				$normalized['...'] =
-					'Over ' . $maxArrayRecursion . ' items, aborting normalization';
+					'Over ' . $maxArrayItems . ' items, aborting normalization';
 				break;
 			}
 			$normalized[$key] = $this->normalize($value, $depth);
 		}
 
 		return $normalized;
+	}
+
+	/**
+	 * Converts a date to String
+	 *
+	 * @param mixed $data
+	 *
+	 * @return null|string
+	 */
+	private function normalizeDate($data) {
+		if ($data instanceof \DateTime) {
+			return $data->format($this->dateFormat);
+		}
+
+		return null;
 	}
 
 	/**
