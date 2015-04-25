@@ -7,7 +7,7 @@ Based on the [Monolog](https://github.com/Seldaek/monolog) normalizer.
 
 ### Initialisation in your class
 
-```
+```php
 use InterfaSys\LogNormalizer\Normalizer;
 
 $normalizer = new Normalizer();
@@ -23,7 +23,7 @@ The constructor supports the following optional arguments
 
 This is what your logging function could look like
 
-```
+```php
 /**
  * Converts the variables in the received log message to string before
  * sending everything to the real logger
@@ -44,7 +44,7 @@ public function log($level, $message, array $variables= []) {
 
 And you would call it like this from another class
 
-```
+```php
 $myLogger->log('debug',
 	'Logger test {var1}, {var2}',
 	[
@@ -56,6 +56,6 @@ $myLogger->log('debug',
 
 ### Normalize a single variable
 
-```
+```php
 $normalizedVariable = $this->normalizer->format($variable);
 ```
