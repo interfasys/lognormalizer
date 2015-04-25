@@ -44,7 +44,7 @@ class Normalizer {
 	/**
 	 * @param int $maxObjectDepth
 	 * @param int $maxArrayItems
-	 * @param null|\DateTime $dateFormat
+	 * @param null|string $dateFormat
 	 */
 	public function __construct($maxObjectDepth = 2, $maxArrayItems = 20, $dateFormat = null) {
 		$this->maxObjectDepth = $maxObjectDepth;
