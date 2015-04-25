@@ -21,14 +21,30 @@ The constructor supports the following optional arguments
 
 ### Normalize a log entry
 
+This is what your logging function could look like
+
 ```
-public function log($level, $message, array $context = []) {
-	array_walk($context, [$this->normalizer, 'format']);
+/**
+ * Converts the variables in the received log message to string before
+ * sending everything to the real logger
+ *
+ * @param string $level
+ * @param string $message
+ * @param array $variables
+ *
+ * @return mixed
+ */
+public function log($level, $message, array $variables= []) {
+	array_walk($variables, [$this->normalizer, 'format']);
 	
-	// Then use your current logging system
-	$this->logger->log($level, $message, $context);
+	// Then use your current PSR-3 compatible logging system
+	$this->logger->log($level, $message, $variables);
 }
 ```	
+
+And you would call it like this from another class
+
+$myLogger->log('debug', 'Logger test {var1}, {var2}', ['var1' => $var1, 'var2' => $var2])
 
 ### Normalize a single variable
 
