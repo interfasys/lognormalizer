@@ -32,7 +32,7 @@
   },
   "autoload": {
     "psr-4": {
-      "InterfaSys\\LogNormalizer\\": "src/InterfaSys/LogNormalizer/"
+      "InterfaSys\\LogNormalizer\\": "src/"
     }
   }
 }
