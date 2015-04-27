@@ -1,7 +1,7 @@
 ## Log Normalizer [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/interfasys/lognormalizer/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/interfasys/lognormalizer/?branch=master)
 Parses variables and converts them to string so that they can be logged
 
-Based on the [Monolog](https://github.com/Seldaek/monolog) normalizer.
+Based on the [Monolog](https://github.com/Seldaek/monolog) formatter/normalizer.
 
 ## How to use
 
@@ -15,11 +15,11 @@ $normalizer = new Normalizer();
 
 The constructor supports the following optional arguments
 
-* `int $maxObjectDepth`: How deep do you want to go when inspecting objects
-* `int $maxArrayItems`: The maximum number of Array elements you want to show, when parsing an array
+* `int $maxRecursionDepth`: The maximum depth at which you want to go in objects and arrays
+* `int $maxArrayItems`: The maximum number of elements you want to show, when parsing an array or an object
 * `string $dateFormat`: The format to apply to dates
 
-### Normalize a log entry
+### Format variables before logging them
 
 This is what your logging function could look like
 
@@ -54,7 +54,7 @@ $myLogger->log('debug',
 );
 ```
 
-### Normalize a single variable
+### Convert a single variable to a string
 
 ```php
 $normalizedVariable = $this->normalizer->format($variable);

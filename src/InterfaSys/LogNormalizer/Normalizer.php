@@ -29,7 +29,7 @@ class Normalizer {
 	/**
 	 * @type int
 	 */
-	private $maxObjectDepth;
+	private $maxRecursionDepth;
 
 	/**
 	 * @type int
@@ -42,12 +42,13 @@ class Normalizer {
 	private $dateFormat;
 
 	/**
-	 * @param int $maxObjectDepth The maximum depth at which to go when inspecting objects
-	 * @param int $maxArrayItems The maximum number of Array elements you want to show, when parsing an array
+	 * @param int $maxRecursionDepth The maximum depth at which to go when inspecting objects
+	 * @param int $maxArrayItems The maximum number of Array elements you want to show, when
+	 *     parsing an array
 	 * @param null|string $dateFormat The format to apply to dates
 	 */
-	public function __construct($maxObjectDepth = 2, $maxArrayItems = 20, $dateFormat = null) {
-		$this->maxObjectDepth = $maxObjectDepth;
+	public function __construct($maxRecursionDepth = 4, $maxArrayItems = 20, $dateFormat = null) {
+		$this->maxRecursionDepth = $maxRecursionDepth;
 		$this->maxArrayItems = $maxArrayItems;
 		if ($dateFormat !== null) {
 			$this->dateFormat = $dateFormat;
@@ -59,25 +60,19 @@ class Normalizer {
 	/**
 	 * Normalises the variable, JSON encodes it if needed and cleans up the result
 	 *
-	 * @todo: could maybe do a better job removing slashes
-	 *
-	 * @param array $data
+	 * @param mixed $data
 	 *
 	 * @return string|null
 	 */
 	public function format(&$data) {
 		$data = $this->normalize($data);
-		if (!is_string($data)) {
-			$data = @json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-			// Removing null byte and double slashes from object properties
-			$data = str_replace(['\\u0000', '\\\\'], ["", "\\"], $data);
-		}
+		$data = $this->convertToString($data);
 
 		return $data;
 	}
 
 	/**
-	 * Converts Objects, Arrays, Dates and Exceptions to a String or a single Array
+	 * Converts Objects, Arrays, Dates and Exceptions to a String or an Array
 	 *
 	 * @param $data
 	 * @param int $depth
@@ -107,6 +102,25 @@ class Normalizer {
 	}
 
 	/**
+	 * JSON encodes data which isn't already a string and cleans up the result
+	 *
+	 * @todo: could maybe do a better job removing slashes
+	 *
+	 * @param mixed $data
+	 *
+	 * @return string|null
+	 */
+	public function convertToString($data) {
+		if (!is_string($data)) {
+			$data = @json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+			// Removing null byte and double slashes from object properties
+			$data = str_replace(['\\u0000', '\\\\'], ["", "\\"], $data);
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Returns various, filtered, scalar elements
 	 *
 	 * We're returning an array here to detect failure because null is a scalar and so is false
@@ -132,15 +146,24 @@ class Normalizer {
 		return [];
 	}
 
+	/**
+	 * Normalises infinite and trigonometric floats
+	 *
+	 * @param float $data
+	 *
+	 * @return string
+	 */
 	private function normalizeFloat($data) {
 		if (is_infinite($data)) {
-			$data = 'INF';
+			$postfix = 'INF';
 			if ($data < 0) {
-				$data = '-' . $data;
+				$postfix = '-' . $postfix;
 			}
-		}
-		if (is_nan($data)) {
-			$data = 'NaN';
+			$data = $postfix;
+		} else {
+			if (is_nan($data)) {
+				$data = 'NaN';
+			}
 		}
 
 		return $data;
@@ -171,9 +194,11 @@ class Normalizer {
 	 * @return array
 	 */
 	private function normalizeTraversableElement($data, $depth) {
+		$maxObjectRecursion = $this->maxRecursionDepth;
 		$maxArrayItems = $this->maxArrayItems;
 		$count = 1;
 		$normalized = [];
+		$nextDepth = $depth + 1;
 		foreach ($data as $key => $value) {
 			if ($count >= $maxArrayItems) {
 				$normalized['...'] =
@@ -181,7 +206,9 @@ class Normalizer {
 				break;
 			}
 			$count++;
-			$normalized[$key] = $this->normalize($value, $depth);
+			if ($depth < $maxObjectRecursion) {
+				$normalized[$key] = $this->normalize($value, $nextDepth);
+			}
 		}
 
 		return $normalized;
@@ -203,7 +230,9 @@ class Normalizer {
 	}
 
 	/**
-	 * Converts an Object to String
+	 * Converts an Object to an Array
+	 *
+	 * We don't convert to json here as we would double encode them
 	 *
 	 * @param mixed $data
 	 * @param int $depth
@@ -216,17 +245,16 @@ class Normalizer {
 				return $this->normalizeException($data);
 			}
 			// We don't need to go too deep in the recursion
-			$maxObjectRecursion = $this->maxObjectDepth;
-			$response = $data;
+			$maxObjectRecursion = $this->maxRecursionDepth;
 			$arrayObject = new \ArrayObject($data);
 			$serializedObject = $arrayObject->getArrayCopy();
 			if ($depth < $maxObjectRecursion) {
 				$depth++;
 				$response = $this->normalize($serializedObject, $depth);
+				return [$this->getObjetName($data) => $response];
 			}
 
-			// Don't convert to json here as we would double encode
-			return [sprintf("[object] (%s)", get_class($data)), $response];
+			return $this->getObjetName($data);
 		}
 
 		return null;
@@ -247,7 +275,7 @@ class Normalizer {
 			'file'    => $exception->getFile() . ':' . $exception->getLine(),
 		];
 		$trace = $exception->getTraceAsString();
-		$data['trace'][] = $trace;
+		$data['trace'] = $trace;
 
 		$previous = $exception->getPrevious();
 		if ($previous) {
@@ -255,6 +283,17 @@ class Normalizer {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Formats the output of the object parsing
+	 *
+	 * @param $object
+	 *
+	 * @return string
+	 */
+	private function getObjetName($object) {
+		return sprintf('[object] (%s)', get_class($object));
 	}
 
 	/**
@@ -266,7 +305,7 @@ class Normalizer {
 	 */
 	private function normalizeResource($data) {
 		if (is_resource($data)) {
-			return "[resource] " . substr((string)$data, 0, 40);
+			return '[resource] ' . substr((string)$data, 0, 40);
 		}
 
 		return null;
