@@ -7,7 +7,7 @@
     "normalizer"
   ],
   "homepage": "https://github.com/interfasys/lognormalizer",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "license": "AGPL 3.0",
   "authors": [
     {
