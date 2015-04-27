@@ -151,7 +151,7 @@ class Normalizer {
 	 *
 	 * @param float $data
 	 *
-	 * @return string
+	 * @return string|double
 	 */
 	private function normalizeFloat($data) {
 		if (is_infinite($data)) {
