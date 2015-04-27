@@ -96,6 +96,20 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($expectedString, $formatted);
 	}
 
+	public function testLongArray() {
+		$keys = range(0, 25);
+		$data = array_fill_keys($keys, 'normalizer');
+
+		$normalizer = new Normalizer(4, 20);
+		$normalized = $normalizer->normalize($data);
+
+
+		$expectedResult = array_slice($data, 0, 19);
+		$expectedResult['...'] = 'Over 20 items, aborting normalization';
+
+		$this->assertEquals($expectedResult, $normalized);
+	}
+
 	public function testArrayWithObject() {
 		$objectFoo = new TestFooNorm;
 		$data = [
@@ -230,7 +244,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		// At this stage, we can't inspect deeper objects
 		$objectBazResult = [
 			'[object] (' . $objectBazName . ')' => [
-				'foo' => '[object] (' . $objectFooName . ')' ,
+				'foo' => '[object] (' . $objectFooName . ')',
 				'bar' => '[object] (' . $objectBarName . ')',
 				'baz' => 'baz'
 			]
