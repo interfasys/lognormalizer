@@ -29,9 +29,12 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$this->normalizer = new Normalizer();
 	}
 
+	/**
+	 * Using format() directly to make sure it doesn't modify strings
+	 */
 	public function testString() {
 		$data = "Don't underestimate the power of the string [+*%&]";
-		$formatted = $this->normalizer->normalize($data);
+		$formatted = $this->normalizer->format($data);
 
 		$this->assertEquals("Don't underestimate the power of the string [+*%&]", $formatted);
 	}
