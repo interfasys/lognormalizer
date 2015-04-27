@@ -1,4 +1,4 @@
-## Log Normalizer [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/interfasys/lognormalizer/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/interfasys/lognormalizer/?branch=master)
+## Log Normalizer [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/interfasys/lognormalizer/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/interfasys/lognormalizer/?branch=master) [![Build Status](https://travis-ci.org/interfasys/lognormalizer.svg?branch=master)](https://travis-ci.org/interfasys/lognormalizer)
 Parses variables and converts them to string so that they can be logged
 
 Based on the [Monolog](https://github.com/Seldaek/monolog) formatter/normalizer.
