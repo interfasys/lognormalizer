@@ -9,9 +9,6 @@ env:
     - secure: "KJRymHvwJnsml+DCVE8nISScuqXY/56RKQP+l0nAoQ/XN6ZakbkvOCX2lMOEth6UYTeHUecTnn2f2Qezel+yFv5wQOWm9MBEO/nBXE9zXBbNE4Uqnq4oVkfBK1yYwtpDHK+7VXYmUM+6ErpBhfq4LfIP+D1X36tqqrFxDmEjl04="
     - secure: "GGQsmEk6XRUyKWSLfFPgw6yxoKV9FCqOzjOmIqHrGt3aIjaiWSIzYBMfdmcRdwpXxAAsChZzPzLSgnPlsarD5cXljYbYwWM/gPJqFvThnpPb3A5UqKPDeyHNC8p3LFdXKkyctSfn5M8veaxpxiGAHC/Mn1Wx2dgkcVre7owMgDY="
 
-tools:
-  external_code_coverage: true
-
 before_script:
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
