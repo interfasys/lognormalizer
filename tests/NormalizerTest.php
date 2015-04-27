@@ -305,6 +305,14 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			], $normalized
 		);
 	}
+
+	public function testUnknown() {
+		$data = fopen('php://memory', 'rb');
+		fclose($data);
+		$normalized = $this->normalizer->normalize($data);
+
+		$this->assertEquals('[unknown(' . gettype($data) . ')]', $normalized);
+	}
 }
 
 class TestFooNorm {
