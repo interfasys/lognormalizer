@@ -15,17 +15,22 @@
 
 namespace InterfaSys\LogNormalizer;
 
+use Exception;
+use PHPUnit\Framework\TestCase;
+use TypeError;
+use function get_class;
+
 /**
  * @covers InterfaSys\LogNormalizer\Normalizer
  */
-class NormalizerTest extends \PHPUnit_Framework_TestCase {
+class NormalizerTest extends TestCase {
 
 	/**
 	 * @var Normalizer
 	 */
 	protected $normalizer;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		$this->normalizer = new Normalizer();
 	}
 
@@ -36,28 +41,29 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$data = "Don't underestimate the power of the string [+*%&]";
 		$formatted = $this->normalizer->format($data);
 
-		$this->assertEquals("Don't underestimate the power of the string [+*%&]", $formatted);
+		self::assertEquals("Don't underestimate the power of the string [+*%&]", $formatted);
 	}
 
 	public function testBoolean() {
 		$data = true;
 		$normalized = $this->normalizer->normalize($data);
 
-		$this->assertTrue($normalized);
+		self::assertTrue($normalized);
 
 		$formatted = $this->normalizer->convertToString($normalized);
 
-		$this->assertEquals('true', $formatted);
+		self::assertEquals('true', $formatted);
 	}
 
 	public function testFloat() {
 		$data = 3.14413;
 		$normalized = $this->normalizer->normalize($data);
-		$this->assertEquals(3.14413, $normalized);
+		self::assertIsFloat($normalized);
 
 		$formatted = $this->normalizer->convertToString($normalized);
 
-		$this->assertEquals('3.14413', $formatted);
+		self::assertIsString($formatted);
+		self::assertEquals(3.14413, $formatted);
 	}
 
 	public function testInfinity() {
@@ -67,18 +73,18 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		];
 		$normalized = $this->normalizer->normalize($data);
 
-		$this->assertEquals($data, $normalized);
+		self::assertEquals($data, $normalized);
 
 		$formatted = $this->normalizer->convertToString($normalized);
 
-		$this->assertEquals('{"inf":"INF","-inf":"-INF"}', $formatted);
+		self::assertEquals('{"inf":"INF","-inf":"-INF"}', $formatted);
 	}
 
 	public function testNan() {
 		$data = acos(4);
 		$normalized = $this->normalizer->normalize($data);
 
-		$this->assertEquals('NaN', $normalized);
+		self::assertEquals('NaN', $normalized);
 	}
 
 	public function testSimpleObject() {
@@ -88,12 +94,12 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$expectedResult = [
 			'[object] (InterfaSys\\LogNormalizer\\TestFooNorm)' => ['foo' => 'foo']
 		];
-		$this->assertEquals($expectedResult, $normalized);
+		self::assertEquals($expectedResult, $normalized);
 
 		$formatted = $this->normalizer->convertToString($normalized);
 		$expectedString = '{"[object] (InterfaSys\\LogNormalizer\\TestFooNorm)":{"foo":"foo"}}';
 
-		$this->assertEquals($expectedString, $formatted);
+		self::assertEquals($expectedString, $formatted);
 	}
 
 	public function testLongArray() {
@@ -103,11 +109,10 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$normalizer = new Normalizer(4, 20);
 		$normalized = $normalizer->normalize($data);
 
-
 		$expectedResult = array_slice($data, 0, 19);
 		$expectedResult['...'] = 'Over 20 items, aborting normalization';
 
-		$this->assertEquals($expectedResult, $normalized);
+		self::assertEquals($expectedResult, $normalized);
 	}
 
 	public function testArrayWithObject() {
@@ -127,7 +132,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			'[object] (' . $objectFooName . ')' => ['foo' => 'foo']
 		];
 
-		$this->assertEquals($objectFooResult, $normalized['foo']);
+		self::assertEquals($objectFooResult, $normalized['foo']);
 
 		$expectedResult = [
 			"foo" => $objectFooResult,
@@ -136,7 +141,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 				true
 			]
 		];
-		$this->assertEquals($expectedResult, $normalized);
+		self::assertEquals($expectedResult, $normalized);
 
 		$formatted = $this->normalizer->convertToString($normalized);
 		$objectFooName = get_class($objectFoo);
@@ -144,7 +149,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$expectedString =
 			'{"foo":' . $objectFooResult . ',"baz":["quz",true]}';
 
-		$this->assertEquals($expectedString, $formatted);
+		self::assertEquals($expectedString, $formatted);
 	}
 
 	public function testUnlimitedObjectRecursion() {
@@ -166,7 +171,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			'[object] (' . $objectFooName . ')' => ['foo' => 'foo']
 		];
 
-		$this->assertEquals(
+		self::assertEquals(
 			$objectFooResult, $normalized['[object] (' . $objectMainName . ')']['foo']
 		);
 
@@ -177,7 +182,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			]
 		];
 
-		$this->assertEquals(
+		self::assertEquals(
 			$objectBarResult, $normalized['[object] (' . $objectMainName . ')']['bar']
 		);
 
@@ -189,7 +194,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			]
 		];
 
-		$this->assertEquals(
+		self::assertEquals(
 			$objectBazResult, $normalized['[object] (' . $objectMainName . ')']['baz']
 		);
 
@@ -202,7 +207,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			]
 		];
 
-		$this->assertEquals($objectMainResult, $normalized);
+		self::assertEquals($objectMainResult, $normalized);
 	}
 
 	public function testLimitedObjectRecursion() {
@@ -224,7 +229,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			'[object] (' . $objectFooName . ')' => ['foo' => 'foo']
 		];
 
-		$this->assertEquals(
+		self::assertEquals(
 			$objectFooResult, $normalized['[object] (' . $objectMainName . ')']['foo']
 		);
 
@@ -236,7 +241,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			]
 		];
 
-		$this->assertEquals(
+		self::assertEquals(
 			$objectBarResult, $normalized['[object] (' . $objectMainName . ')']['bar']
 		);
 
@@ -250,7 +255,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			]
 		];
 
-		$this->assertEquals(
+		self::assertEquals(
 			$objectBazResult, $normalized['[object] (' . $objectMainName . ')']['baz']
 		);
 
@@ -263,7 +268,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 			]
 		];
 
-		$this->assertEquals($objectMainResult, $normalized);
+		self::assertEquals($objectMainResult, $normalized);
 	}
 
 	public function testDate() {
@@ -271,7 +276,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$data = new \DateTime;
 		$normalized = $normalizer->normalize($data);
 
-		$this->assertEquals(date('Y-m-d'), $normalized);
+		self::assertEquals(date('Y-m-d'), $normalized);
 	}
 
 	public function testResource() {
@@ -279,7 +284,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		$resourceId = (int)$data;
 		$normalized = $this->normalizer->normalize($data);
 
-		$this->assertEquals('[resource] Resource id #' . $resourceId, $normalized);
+		self::assertEquals('[resource] Resource id #' . $resourceId, $normalized);
 	}
 
 	public function testFormatExceptions() {
@@ -290,10 +295,10 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		];
 		$normalized = $this->normalizer->normalize($data);
 
-		$this->assertTrue(isset($normalized['exception']['previous']));
+		self::assertTrue(isset($normalized['exception']['previous']));
 		unset($normalized['exception']['previous']);
 
-		$this->assertEquals(
+		self::assertEquals(
 			[
 				'exception' => [
 					'class'   => get_class($e2),
@@ -306,12 +311,41 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase {
 		);
 	}
 
+	public function testFormatExceptionWithPreviousThrowable() {
+		$t = new TypeError("not a type error");
+		$e = new Exception("an exception", 13, $t);
+
+		$normalized = $this->normalizer->normalize([
+			'exception' => $e,
+		]);
+
+		self::assertEquals(
+			[
+				'exception' => [
+					'class'   => get_class($e),
+					'message' => $e->getMessage(),
+					'code'    => $e->getCode(),
+					'file'    => $e->getFile() . ':' . $e->getLine(),
+					'trace'   => $e->getTraceAsString(),
+					'previous' => [
+						'class' => 'TypeError',
+						'message' => 'not a type error',
+						'code' => 0,
+						'file' => $t->getFile() . ':' . $t->getLine(),
+						'trace' => $t->getTraceAsString(),
+					]
+				]
+			], $normalized
+		);
+		self::assertTrue(isset($normalized['exception']['previous']));
+	}
+
 	public function testUnknown() {
 		$data = fopen('php://memory', 'rb');
 		fclose($data);
 		$normalized = $this->normalizer->normalize($data);
 
-		$this->assertEquals('[unknown(' . gettype($data) . ')]', $normalized);
+		self::assertEquals('[unknown(' . gettype($data) . ')]', $normalized);
 	}
 }
 
